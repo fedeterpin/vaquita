@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pools        Pool[]
+  contributions Contribution[]
+}
+
+model Pool {
+  id                     String   @id @default(uuid())
+  title                  String
+  description            String?
+  ownerId                String
+  owner                  User      @relation(fields: [ownerId], references: [id])
+  isPublic               Boolean
+  contributionsVisibility PoolVisibility
+  targetAmount           Decimal?
+  currency               String    @default("ARS")
+  deadline               DateTime
+  status                 PoolStatus @default(OPEN)
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+
+  contributions          Contribution[]
+  inviteTokens           InviteToken[]
+}
+
+enum PoolVisibility {
+  PUBLIC
+  ANONYMOUS
+}
+
+enum PoolStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+model Contribution {
+  id                String    @id @default(uuid())
+  poolId            String
+  userId            String
+  pool              Pool      @relation(fields: [poolId], references: [id])
+  user              User      @relation(fields: [userId], references: [id])
+  amount            Decimal
+  currency          String
+  isVisibleToOthers Boolean
+  paymentStatus     PaymentStatus
+  paymentProvider   String
+  paymentReference  String?
+  createdAt         DateTime @default(now())
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model InviteToken {
+  id        String   @id @default(uuid())
+  poolId    String
+  pool      Pool     @relation(fields: [poolId], references: [id])
+  token     String   @unique
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+}
