@@ -1,0 +1,22 @@
+{
+  "name": "vaquita",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Crowd-pooling web application built as a pnpm monorepo",
+  "scripts": {
+    "dev:backend": "pnpm --filter ./apps/backend dev",
+    "dev:frontend": "pnpm --filter ./apps/frontend dev",
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "build": "pnpm --recursive --filter \"./apps/*\" build",
+    "test": "pnpm --recursive --filter \"./apps/*\" test",
+    "lint": "pnpm --recursive --filter \"./apps/*\" lint"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@10.8.1",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

@@ -3,8 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
 }
 
 model User {
@@ -16,6 +15,8 @@ model User {
   updatedAt    DateTime @updatedAt
   pools        Pool[]
   contributions Contribution[]
+
+  @@index([email])
 }
 
 model Pool {
@@ -23,7 +24,7 @@ model Pool {
   title                  String
   description            String?
   ownerId                String
-  owner                  User      @relation(fields: [ownerId], references: [id])
+  owner                  User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   isPublic               Boolean
   contributionsVisibility PoolVisibility
   targetAmount           Decimal?
@@ -35,6 +36,10 @@ model Pool {
 
   contributions          Contribution[]
   inviteTokens           InviteToken[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([isPublic])
 }
 
 enum PoolVisibility {
@@ -52,8 +57,8 @@ model Contribution {
   id                String    @id @default(uuid())
   poolId            String
   userId            String
-  pool              Pool      @relation(fields: [poolId], references: [id])
-  user              User      @relation(fields: [userId], references: [id])
+  pool              Pool      @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   amount            Decimal
   currency          String
   isVisibleToOthers Boolean
@@ -61,6 +66,10 @@ model Contribution {
   paymentProvider   String
   paymentReference  String?
   createdAt         DateTime @default(now())
+
+  @@index([poolId])
+  @@index([userId])
+  @@index([paymentStatus])
 }
 
 enum PaymentStatus {
@@ -73,8 +82,12 @@ enum PaymentStatus {
 model InviteToken {
   id        String   @id @default(uuid())
   poolId    String
-  pool      Pool     @relation(fields: [poolId], references: [id])
+  pool      Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
   token     String   @unique
   expiresAt DateTime?
   createdAt DateTime @default(now())
+
+  @@index([poolId])
+  @@index([token])
+  @@index([expiresAt])
 }
